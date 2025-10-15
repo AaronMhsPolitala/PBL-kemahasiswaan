@@ -1,0 +1,173 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:#f8f9fa;color:#333;display:flex}
+a{text-decoration:none;color:inherit}
+ul{list-style:none}
+
+/* Sidebar */
+.sidebar{width:250px;background:#fff;height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;border-right:1px solid #e9ecef; transition: width 0.3s ease;}
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid #e9ecef}
+.sidebar-header img.logo {
+    width: 50px;         /* ukuran logo */
+    height: 50px;
+    object-fit: contain; /* biar tidak gepeng */
+    border-radius: 50%;  /* bulat, kalau mau kotak hapus */
+    display: block;
+}
+.sidebar-header .menu-icon{font-size:22px;cursor:pointer;color:#343a40}
+.sidebar-nav{flex-grow:1;padding:15px 0}
+.sidebar-nav ul li{margin:2px 15px}
+.sidebar-nav ul li a{display:flex;align-items:center;padding:10px 15px;border-radius:6px;font-size:14px;font-weight:500;color:#495057;transition:background-color .3s,color .3s}
+.sidebar-nav ul li a .nav-icon{margin-right:15px;font-size:16px;width:20px;text-align:center;color:#6c757d}
+.sidebar-nav ul li a.active,.sidebar-nav ul li a:hover{background:#e9ecef;color:#0d6efd}
+.sidebar-nav ul li a:hover .nav-icon,.sidebar-nav ul li a.active .nav-icon{color:#0d6efd}
+.sidebar-nav ul .nav-title{font-size:11px;font-weight:600;color:#adb5bd;text-transform:uppercase;padding:20px 20px 5px}
+
+/* Main + Cards + Table (lanjutkan sesuai file asli) */
+.main-content{margin-left:250px;width:calc(100% - 250px);padding:20px 30px; transition: margin-left 0.3s ease, width 0.3s ease;}
+.topbar{display:flex;justify-content:flex-end;align-items:center;padding-bottom:25px}
+.user-profile{display:flex;align-items:center;cursor:pointer}
+.user-profile span{margin-right:15px;font-weight:500;font-size:15px}
+.user-profile img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.cards-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:#fff;padding:20px;border-radius:8px;display:flex;align-items:center;border:1px solid #e9ecef;transition:box-shadow .3s,transform .3s}
+.card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,.07)}
+.card .card-icon{width:45px;height:45px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;margin-right:15px;background:#0d6efd}
+.card-info h3{font-size:14px;font-weight:500;color:#6c757d}
+.card-info p{font-size:22px;font-weight:700;color:#343a40}
+.data-table-container{margin-top:30px;background:#fff;padding:25px;border-radius:8px;border:1px solid #e9ecef}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th,.data-table td{padding:15px 10px;text-align:left;border-bottom:1px solid #f0f0f0;font-size:14px}
+.data-table th{font-size:12px;font-weight:600;color:#888;text-transform:uppercase}
+.data-table .user-photo img{width:36px;height:36px;border-radius:50%;background:#e0e0e0}
+
+/* Hapus background biru bawaan */
+.sidebar-header .logo {
+    width: 50px;          /* ukuran logo */
+    height: 50px;
+    object-fit: contain;  /* biar tidak gepeng, tetap proporsional */
+    border-radius: 50%;   /* kalau mau bulat, hapus kalau kotak */
+    display: block;
+    background: none !important; /* matikan background biru */
+}
+
+.sidebar-nav ul li a .arrow-icon {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar.collapsed {
+    width: 88px; /* Lebar sidebar saat diciutkan */
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-header .logo,
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .nav-title,
+.sidebar.collapsed .arrow-icon {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-nav ul li {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.sidebar.collapsed .sidebar-nav ul li a {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-nav ul li a .nav-icon {
+    margin-right: 0;
+}
+
+/* Expanded Main Content */
+.main-content.expanded {
+    margin-left: 88px;
+    width: calc(100% - 88px);
+}
+
+/* Custom styling for <details> dropdown in sidebar */
+.sidebar-nav details {
+    width: 100%;
+}
+
+.sidebar-nav details summary {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+    cursor: pointer;
+    list-style: none; /* Remove default marker */
+    width: 100%;
+    background: none;
+    border: none;
+    transition: background-color .3s,color .3s;
+}
+
+.sidebar-nav details summary::-webkit-details-marker {
+    display: none; /* Remove default marker for Chrome/Safari */
+}
+
+.sidebar-nav details summary .nav-icon {
+    margin-right: 15px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.sidebar-nav details summary:hover {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.sidebar-nav details summary:hover .nav-icon,
+.sidebar-nav details[open] > summary .nav-icon {
+    color: #0d6efd;
+}
+
+.sidebar-nav details[open] > summary {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.sidebar-nav details .items {
+    padding-left: 30px; /* Indent the submenu items */
+}
+
+.sidebar-nav details .items a {
+    display: block;
+    padding: 8px 15px;
+    color: #495057;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.sidebar-nav details .items a:hover {
+    color: #0d6efd;
+}
+
+.sidebar-nav details summary .arrow-icon {
+    margin-left: auto;
+    transition: transform 0.3s;
+}
+
+.sidebar-nav details[open] > summary .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.sidebar.collapsed .sidebar-nav details summary {
+    justify-content: center; /* Center the content of the summary */
+    padding: 10px 0; /* Adjust padding for collapsed state */
+}
+
+.sidebar.collapsed .sidebar-nav details summary .nav-icon {
+    margin-right: 0; /* Remove margin for collapsed state */
+}
