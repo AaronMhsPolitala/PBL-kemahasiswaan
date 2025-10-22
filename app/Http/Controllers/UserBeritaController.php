@@ -32,6 +32,6 @@ class UserBeritaController extends Controller
         $komentar->berita_id = $berita->id;
         $komentar->save();
 
-        return back()->with('success', 'Komentar berhasil ditambahkan.')->withFragment('komentar-section');
+        return back()->with('success', 'Komentar berhasil ditambahkan.');
     }
 }

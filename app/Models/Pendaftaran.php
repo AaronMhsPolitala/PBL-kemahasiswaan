@@ -10,15 +10,9 @@ class Pendaftaran extends Model
         'name',
         'nim',
         'hp',
-        'prodi',
-        'divisi_id',
+        'divisi',
         'alasan_bergabung',
         'status',
         'gambar',
     ];
-
-    public function divisi()
-    {
-        return $this->belongsTo(Divisi::class);
-    }
 }

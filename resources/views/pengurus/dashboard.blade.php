@@ -11,7 +11,7 @@
     </div>
     <div class="card">
       <div class="card-icon"><i class="fas fa-users"></i></div>
-      <div class="card-info"><h3>Data Anggota</h3><p>{{ $anggotaCount }}</p></div>
+      <div class="card-info"><h3>Data Anggota</h3><p>0</p></div>
     </div>
     <div class="card">
       <div class="card-icon"><i class="fas fa-newspaper"></i></div>

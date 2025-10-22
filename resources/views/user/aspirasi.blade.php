@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="form-container">
-        <div id="aspirasi-form" class="form-header">
+        <div class="form-header">
             <h1>Kotak Aspirasi</h1>
             <p>Sampaikan aspirasi, kritik, dan saran Anda untuk HMTI yang lebih baik.</p>
         </div>

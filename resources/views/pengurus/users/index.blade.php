@@ -48,6 +48,7 @@
   <table class="data-table">
     <thead>
       <tr>
+        <th>Photo</th>
         <th>Name</th>
         <th>Email</th>
         <th>No. WA</th>
@@ -58,6 +59,7 @@
     <tbody>
       @forelse ($users as $user)
         <tr>
+          <td><img src="{{ $user->photo_url ?? 'https://i.pravatar.cc/40' }}" alt="Photo" style="width: 40px; height: 40px; border-radius: 50%;"></td>
           <td>{{ $user->name }}</td>
           <td>{{ $user->email }}</td>
           <td>{{ $user->no_wa ?? 'N/A' }}</td>
@@ -89,7 +91,8 @@
   <div class="custom-modal-content">
     <span class="custom-modal-close">&times;</span>
     <h2>Detail Pengguna</h2>
-    <div style="padding-top:1rem;">
+    <div style="padding-top:1rem; text-align: center;">
+        <img id="view_photo" src="" alt="Photo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 1rem; object-fit: cover;">
         <p><strong>Nama:</strong> <span id="view_name"></span></p>
         <p><strong>Email:</strong> <span id="view_email"></span></p>
         <p><strong>No. WA:</strong> <span id="view_no_wa"></span></p>
@@ -121,7 +124,6 @@
         <div class="form-group">
             <label for="edit_role">Role</label>
             <select id="edit_role" name="role" class="form-control" required>
-            <option value="admin">Admin</option>
             <option value="pengurus">Pengurus</option>
             <option value="user">User</option>
             </select>
@@ -177,9 +179,10 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-lihat').forEach(button => {
         button.addEventListener('click', function () {
             const userId = this.dataset.id;
-            fetch(`/pengurus/users/${userId}`)
+            fetch(`/admin/users/${userId}`)
                 .then(response => response.json())
                 .then(user => {
+                    document.getElementById('view_photo').src = user.photo_url || 'https://i.pravatar.cc/100';
                     document.getElementById('view_name').textContent = user.name;
                     document.getElementById('view_email').textContent = user.email;
                     document.getElementById('view_no_wa').textContent = user.no_wa || 'N/A';
@@ -193,14 +196,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-edit').forEach(button => {
         button.addEventListener('click', function () {
             const userId = this.dataset.id;
-            fetch(`/pengurus/users/${userId}/edit`)
+            fetch(`/admin/users/${userId}/edit`)
                 .then(response => response.json())
                 .then(user => {
                     document.getElementById('edit_name').value = user.name;
                     document.getElementById('edit_email').value = user.email;
                     document.getElementById('edit_no_wa').value = user.no_wa;
                     document.getElementById('edit_role').value = user.role;
-                    document.getElementById('editForm').action = `/pengurus/users/${userId}`;
+                    document.getElementById('editForm').action = `/admin/users/${userId}`;
                     editModal.style.display = 'block';
                 });
         });
@@ -210,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-hapus').forEach(button => {
         button.addEventListener('click', function () {
             const userId = this.dataset.id;
-            document.getElementById('deleteForm').action = `/pengurus/users/${userId}`;
+            document.getElementById('deleteForm').action = `/admin/users/${userId}`;
             deleteModal.style.display = 'block';
         });
     });

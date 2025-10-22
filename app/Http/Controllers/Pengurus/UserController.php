@@ -60,7 +60,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'no_wa' => 'nullable|string|max:20',
-            'role' => 'required|in:admin,pengurus,user',
+            'role' => 'required|in:pengurus,user',
         ]);
 
         if ($validator->fails()) {

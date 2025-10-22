@@ -17,6 +17,6 @@ class AspirasiUserController extends Controller
 
         Aspirasi::create($request->all());
 
-        return back()->with('ok', 'Terima kasih, aspirasi Anda telah kami terima.')->withFragment('aspirasi-form');
+        return back()->with('ok', 'Terima kasih, aspirasi Anda telah kami terima.');
     }
 }
