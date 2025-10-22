@@ -7,6 +7,7 @@ use App\Models\Prestasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PrestasiController extends Controller
 {
@@ -35,14 +36,24 @@ class PrestasiController extends Controller
             $query->where('keterangan', $request->keterangan);
         }
 
-        // Sort
-        $sortBy = $request->get('sort_by', 'waktu_penyelenggaraan');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        if (in_array($sortBy, ['nama_mahasiswa', 'waktu_penyelenggaraan', 'tingkat_kegiatan', 'keterangan']) && in_array($sortDirection, ['asc', 'desc'])) {
-            $query->orderBy($sortBy, $sortDirection);
-        }
+        // Get all matching results
+        $allPrestasis = $query->get();
 
-        $prestasis = $query->paginate(10)->withQueryString();
+        // Sort by SAW score
+        $sortedPrestasis = $allPrestasis->sortByDesc('total_skor');
+
+        // Manual Pagination
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $offset = ($page * $perPage) - $perPage;
+
+        $prestasis = new LengthAwarePaginator(
+            $sortedPrestasis->slice($offset, $perPage),
+            $sortedPrestasis->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         // Data for filters
         $tingkat_kegiatans = ['Internal (Kampus)', 'Kabupaten/Kota', 'Provinsi', 'Nasional', 'Internasional'];
@@ -67,9 +78,9 @@ class PrestasiController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'nim' => 'required|string|max:20',
+            'nim' => 'required|numeric',
             'nama_mahasiswa' => 'required|string|max:255',
-            'program_studi' => 'required|string|max:100',
+            'ipk' => 'required|numeric|between:0,4.00',
             'nama_kegiatan' => 'required|string|max:255',
             'waktu_penyelenggaraan' => 'required|date',
             'tingkat_kegiatan' => ['required', Rule::in(['Internal (Kampus)', 'Kabupaten/Kota', 'Provinsi', 'Nasional', 'Internasional'])],
@@ -113,9 +124,9 @@ class PrestasiController extends Controller
     public function update(Request $request, Prestasi $prestasi)
     {
         $validatedData = $request->validate([
-            'nim' => 'required|string|max:20',
+            'nim' => 'required|numeric',
             'nama_mahasiswa' => 'required|string|max:255',
-            'program_studi' => 'required|string|max:100',
+            'ipk' => 'required|numeric|between:0,4.00',
             'nama_kegiatan' => 'required|string|max:255',
             'waktu_penyelenggaraan' => 'required|date',
             'tingkat_kegiatan' => ['required', Rule::in(['Internal (Kampus)', 'Kabupaten/Kota', 'Provinsi', 'Nasional', 'Internasional'])],
@@ -152,5 +163,91 @@ class PrestasiController extends Controller
 
         $prestasi->delete();
         return redirect()->route('admin.prestasi.index')->with('success', 'Data prestasi berhasil dihapus.');
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $query = Prestasi::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_mahasiswa', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('nama_kegiatan', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter
+        if ($request->filled('tingkat_kegiatan')) {
+            $query->where('tingkat_kegiatan', $request->tingkat_kegiatan);
+        }
+        if ($request->filled('keterangan')) {
+            $query->where('keterangan', $request->keterangan);
+        }
+
+        $prestasis = $query->get();
+
+        $fileName = 'prestasi.csv';
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('NIM', 'Nama Mahasiswa', 'IPK', 'Skor', 'Kegiatan', 'Waktu', 'Tingkat', 'Prestasi');
+
+        $callback = function() use($prestasis, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($prestasis as $prestasi) {
+                $row['NIM']  = $prestasi->nim;
+                $row['Nama Mahasiswa']    = $prestasi->nama_mahasiswa;
+                $row['IPK']    = number_format($prestasi->ipk, 2);
+                $row['Skor']    = number_format($prestasi->total_skor, 2);
+                $row['Kegiatan']  = $prestasi->nama_kegiatan;
+                $row['Waktu']  = \Carbon\Carbon::parse($prestasi->waktu_penyelenggaraan)->translatedFormat('d F Y');
+                $row['Tingkat']  = $prestasi->tingkat_kegiatan;
+                $row['Prestasi']  = $prestasi->prestasi_yang_dicapai;
+
+                fputcsv($file, array($row['NIM'], $row['Nama Mahasiswa'], $row['IPK'], $row['Skor'], $row['Kegiatan'], $row['Waktu'], $row['Tingkat'], $row['Prestasi']));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = Prestasi::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_mahasiswa', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('nama_kegiatan', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter
+        if ($request->filled('tingkat_kegiatan')) {
+            $query->where('tingkat_kegiatan', $request->tingkat_kegiatan);
+        }
+        if ($request->filled('keterangan')) {
+            $query->where('keterangan', $request->keterangan);
+        }
+
+        $prestasis = $query->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.prestasi.prestasi_pdf', compact('prestasis'));
+        return $pdf->download('prestasi.pdf');
     }
 }

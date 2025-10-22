@@ -23,6 +23,7 @@
     .btn-primary { background-color: var(--primary-color); color: #fff; }
     .btn-edit { background-color: #f97316; color: #fff; }
     .btn-danger { background-color: var(--danger-color); color: #fff; }
+    .btn-success { background-color: var(--success-color); color: #fff; }
     .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
     .filter-bar input, .filter-bar select { padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid var(--border-color); }
     .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.375rem; }
@@ -37,14 +38,19 @@
 <div id="prestasi-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Data Prestasi Mahasiswa</h1>
-        <a href="{{ route('admin.prestasi.create') }}" class="btn btn-primary">Tambah Data</a>
+        <div class="d-flex">
+            <a href="{{ route('admin.prestasi.create') }}" class="btn btn-primary me-2">Tambah Data</a>
+            <a href="{{ route('admin.prestasi.export.pdf') }}" class="btn btn-danger me-2">Export PDF</a>
+            <a href="{{ route('admin.prestasi.export.csv') }}" class="btn btn-success">Export CSV</a>
+        </div>
     </div>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <div class="filter-bar">
+    <div class="mt-4">
+        <div class="filter-bar" style="margin-top: 2rem;">
         <form action="{{ route('admin.prestasi.index') }}" method="GET" class="d-flex gap-3">
             <input type="text" name="search" placeholder="Cari NIM, Nama, Kegiatan..." value="{{ request('search') }}">
             <select name="tingkat_kegiatan">
@@ -69,6 +75,8 @@
                 <tr>
                     <th>NIM</th>
                     <th>Nama Mahasiswa</th>
+                    <th>IPK</th>
+                    <th>Skor</th>
                     <th>Kegiatan</th>
                     <th>Waktu</th>
                     <th>Tingkat</th>
@@ -81,6 +89,8 @@
                     <tr>
                         <td>{{ $prestasi->nim }}</td>
                         <td>{{ $prestasi->nama_mahasiswa }}</td>
+                        <td>{{ number_format($prestasi->ipk, 2) }}</td>
+                        <td>{{ number_format($prestasi->total_skor, 2) }}</td>
                         <td>{{ $prestasi->nama_kegiatan }}</td>
                         <td>{{ \Carbon\Carbon::parse($prestasi->waktu_penyelenggaraan)->translatedFormat('d F Y') }}</td>
                         <td>{{ $prestasi->tingkat_kegiatan }}</td>
@@ -96,7 +106,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">Tidak ada data prestasi.</td>
+                        <td colspan="9" class="text-center py-5">Tidak ada data prestasi.</td>
                     </tr>
                 @endforelse
             </tbody>

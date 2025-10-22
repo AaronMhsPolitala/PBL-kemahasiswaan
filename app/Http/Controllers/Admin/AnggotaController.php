@@ -8,13 +8,14 @@ use App\Models\Pendaftaran;
 use App\Services\FonnteService; // Import FonnteService
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log; // Import Log
+use Illuminate\Support\Facades\Storage;
 
 class AnggotaController extends Controller
 {
 
     public function calonAnggota()
     {
-        $candidates = Pendaftaran::whereNotIn('status', ['diterima', 'ditolak', 'Anggota Aktif', 'Gagal Wawancara'])->get();
+        $candidates = Pendaftaran::whereNotIn('status', ['diterima', 'ditolak', 'Anggota Aktif', 'Gagal Wawancara', 'Lulus Wawancara'])->get();
         return view('admin.calon-anggota.index', compact('candidates'));
     }
 
@@ -68,20 +69,12 @@ class AnggotaController extends Controller
         $pendaftaran->save();
 
         // Kirim notifikasi WhatsApp
-        $message = "Halo, {$pendaftaran->nama}
-Terima kasih telah mendaftar sebagai calon Pengurus HIMA-TI Politeknik Negeri Tanah Laut periode 2025/2026.
-
-Berdasarkan hasil seleksi administrasi, Anda dinyatakan lolos ke tahap wawancara.
-Mohon tetap semangat dan persiapkan diri dengan baik.
-
-Langkah selanjutnya:
-1. Bergabung ke grup informasi seleksi melalui tautan berikut:
-https://chat.whatsapp.com/HRWZs2tMXUP30Cc7x7aS1y?mode=ems_copy_c
-2. Jadwal wawancara dan panduannya akan disampaikan melalui grup tersebut.
-3. Pastikan selalu memantau informasi agar tidak ketinggalan jadwal.
-
-Terima kasih atas antusiasme Anda untuk menjadi bagian dari HIMA-TI Politala.
-– Departemen PSDM HIMA-TI Politala";
+        $template = Storage::disk('local')->get('wa_template_diterima.txt');
+        $message = str_replace(
+            ['{nama}', '{nim}', '{divisi}'],
+            [$pendaftaran->nama, $pendaftaran->nim, $pendaftaran->divisi->nama_divisi],
+            $template
+        );
         $result = $fonnte->send($pendaftaran->hp, $message);
 
         if ($result['ok']) {
@@ -98,17 +91,12 @@ Terima kasih atas antusiasme Anda untuk menjadi bagian dari HIMA-TI Politala.
         $pendaftaran->save();
 
         // Kirim notifikasi WhatsApp
-        $message = "Halo, {$pendaftaran->nama}
-Terima kasih telah mengikuti proses pendaftaran calon Pengurus HIMA-TI Politeknik Negeri Tanah Laut periode 2025/2026.
-
-Berdasarkan hasil seleksi administrasi, saat ini Anda belum dapat melanjutkan ke tahap wawancara.
-Kami sangat menghargai waktu dan antusiasme Anda dalam mengikuti proses ini.
-
-Jangan berkecil hati, masih banyak kesempatan untuk berkontribusi dan terlibat dalam kegiatan HIMA-TI di masa mendatang.
-Kami berharap Anda tetap semangat dan terus aktif mengembangkan diri.
-
-Terima kasih telah menunjukkan minat untuk menjadi bagian dari HIMA-TI Politala.
-– Departemen PSDM HIMA-TI Politala";
+        $template = Storage::disk('local')->get('wa_template_ditolak.txt');
+        $message = str_replace(
+            ['{nama}', '{nim}', '{divisi}'],
+            [$pendaftaran->nama, $pendaftaran->nim, $pendaftaran->divisi->nama_divisi],
+            $template
+        );
         $result = $fonnte->send($pendaftaran->hp, $message);
 
         if ($result['ok']) {
@@ -173,5 +161,100 @@ Terima kasih telah menunjukkan minat untuk menjadi bagian dari HIMA-TI Politala.
     {
         $anggotum->delete();
         return redirect()->back()->with('success', 'Calon anggota berhasil dihapus.');
+    }
+
+    public function exportCsvTahap1(Request $request)
+    {
+        $query = Pendaftaran::query()->with('divisi');
+
+        $query->whereIn('status', ['diterima', 'ditolak', 'Gagal Wawancara', 'Lulus Wawancara']);
+
+        // Search by name or NIM
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by division
+        if ($request->filled('divisi_id')) {
+            $query->where('divisi_id', $request->divisi_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $candidates = $query->get();
+
+        $fileName = 'calon-anggota-tahap-1.csv';
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('Nama Lengkap', 'NIM', 'Nomor HP', 'Divisi Tujuan', 'Status');
+
+        $callback = function() use($candidates, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($candidates as $candidate) {
+                $row['Nama Lengkap']  = $candidate->name;
+                $row['NIM']    = $candidate->nim ?? 'N/A';
+                $row['Nomor HP']    = $candidate->hp ?? 'N/A';
+                $row['Divisi Tujuan']  = $candidate->divisi->nama_divisi ?? 'N/A';
+                $row['Status']  = $candidate->status ?? 'Menunggu';
+
+                fputcsv($file, array($row['Nama Lengkap'], $row['NIM'], $row['Nomor HP'], $row['Divisi Tujuan'], $row['Status']));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdfTahap1(Request $request)
+    {
+        $query = Pendaftaran::query()->with('divisi');
+
+        $query->whereIn('status', ['diterima', 'ditolak', 'Gagal Wawancara', 'Lulus Wawancara']);
+
+        // Search by name or NIM
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by division
+        if ($request->filled('divisi_id')) {
+            $query->where('divisi_id', $request->divisi_id);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $candidates = $query->get();
+        $statuses = [
+            'diterima' => 'Lolos ke Tahap 2',
+            'ditolak' => 'Ditolak (Administrasi)',
+            'Gagal Wawancara' => 'Gagal Wawancara',
+            'Lulus Wawancara' => 'Lulus Wawancara (Anggota)'
+        ];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.calon-anggota-tahap-1.calon-anggota-tahap-1_pdf', compact('candidates', 'statuses'));
+        return $pdf->download('calon-anggota-tahap-1.pdf');
     }
 }

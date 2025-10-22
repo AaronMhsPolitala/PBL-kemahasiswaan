@@ -69,7 +69,7 @@ class PengaduanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nim' => 'required_if:anonim,false|string|max:255',
+            'nim' => 'required_if:anonim,false|numeric',
             'nama' => 'required_if:anonim,false|string|max:255',
             'semester' => 'required_if:anonim,false|integer|min:1',
             'jenis_masalah' => 'required|string|max:255',
@@ -77,7 +77,6 @@ class PengaduanController extends Controller
             'kontak_pengadu' => 'nullable|string|max:255',
             'lampiran' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'anonim' => 'nullable|boolean',
-            'persetujuan' => 'required|accepted',
         ]);
 
         $data = $request->all();
@@ -97,6 +96,83 @@ class PengaduanController extends Controller
 
         Pengaduan::create($data);
 
-        return redirect()->route('user.bermasalah')->with('success', 'Pengaduan Anda telah berhasil dikirim. Kode tiket Anda adalah: ' . $data['kode_tiket']);
+        return redirect()->route('admin.mahasiswa-bermasalah.index')->with('success', 'Pengaduan berhasil ditambahkan.');
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $query = Pengaduan::query();
+
+        if ($request->has('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nim', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->has('jenis_masalah') && $request->jenis_masalah != '') {
+            $query->where('jenis_masalah', $request->jenis_masalah);
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $pengaduans = $query->latest()->get();
+
+        $fileName = 'mahasiswa-bermasalah.csv';
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array('NIM', 'Nama', 'Jenis Masalah', 'Deskripsi', 'Status');
+
+        $callback = function() use($pengaduans, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($pengaduans as $pengaduan) {
+                $row['NIM']  = $pengaduan->nim ?? 'Anonim';
+                $row['Nama']    = $pengaduan->nama ?? 'Anonim';
+                $row['Jenis Masalah']    = $pengaduan->jenis_masalah;
+                $row['Deskripsi']  = $pengaduan->keterangan;
+                $row['Status']  = $pengaduan->status;
+
+                fputcsv($file, array($row['NIM'], $row['Nama'], $row['Jenis Masalah'], $row['Deskripsi'], $row['Status']));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = Pengaduan::query();
+
+        if ($request->has('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nim', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->has('jenis_masalah') && $request->jenis_masalah != '') {
+            $query->where('jenis_masalah', $request->jenis_masalah);
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $pengaduans = $query->latest()->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.bermasalah.bermasalah_pdf', compact('pengaduans'));
+        return $pdf->download('mahasiswa-bermasalah.pdf');
     }
 }

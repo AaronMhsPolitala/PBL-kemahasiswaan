@@ -22,10 +22,14 @@ use App\Http\Controllers\Admin\PengaduanController as AdminPengaduanController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Pengurus\UserController as PengurusUserController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\Admin\PengaturanController as AdminPengaturanController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Pengurus\PengaturanController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('user.beranda');
 });
 
 // --- AWAL PENAMBAHAN ROUTE OTENTIKASI ---
@@ -53,10 +57,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('aspirasi', AdminAspirasiController::class)->only(['index', 'show', 'destroy']);
     Route::resource('berita', AdminBeritaController::class);
     Route::resource('prestasi', AdminPrestasiController::class);
+    Route::get('/prestasi/export/pdf', [AdminPrestasiController::class, 'exportPdf'])->name('prestasi.export.pdf');
+    Route::get('/prestasi/export/csv', [AdminPrestasiController::class, 'exportCsv'])->name('prestasi.export.csv');
     Route::resource('anggota', AdminAnggotaController::class);
     Route::resource('divisi', DivisiController::class);
     Route::resource('users', AdminUserController::class);
     Route::resource('mahasiswa-bermasalah', AdminPengaduanController::class)->except([]);
+    Route::get('/mahasiswa-bermasalah/export/pdf', [AdminPengaduanController::class, 'exportPdf'])->name('mahasiswa-bermasalah.export.pdf');
+    Route::get('/mahasiswa-bermasalah/export/csv', [AdminPengaduanController::class, 'exportCsv'])->name('mahasiswa-bermasalah.export.csv');
 
     Route::get('/kelola-anggota-himati', [AdminAnggotaController::class, 'kelolaAnggotaHimati'])->name('kelola-anggota-himati.index');
     Route::get('/anggota-per-divisi/{divisi}', [AdminAnggotaController::class, 'anggotaPerDivisi'])->name('anggota.per.divisi');
@@ -64,10 +72,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('calon-anggota/{pendaftaran}/approve', [AdminAnggotaController::class, 'approveCandidate'])->name('calon-anggota.approve');
     Route::post('calon-anggota/{pendaftaran}/reject', [AdminAnggotaController::class, 'rejectCandidate'])->name('calon-anggota.reject');
     Route::get('/calon-anggota-tahap-1', [AdminAnggotaController::class, 'calonAnggotaTahap1'])->name('calon-anggota-tahap-1.index');
+    Route::get('/calon-anggota-tahap-1/export/pdf', [AdminAnggotaController::class, 'exportPdfTahap1'])->name('calon-anggota-tahap-1.export.pdf');
+    Route::get('/calon-anggota-tahap-1/export/csv', [AdminAnggotaController::class, 'exportCsvTahap1'])->name('calon-anggota-tahap-1.export.csv');
     Route::get('/calon-anggota-tahap-2', [AdminAnggotaController::class, 'calonAnggotaTahap2'])->name('calon-anggota-tahap-2.index');
     Route::post('calon-anggota/{pendaftaran}/pass-interview', [AdminAnggotaController::class, 'passInterview'])->name('calon-anggota.pass-interview');
     Route::post('calon-anggota/{pendaftaran}/fail-interview', [AdminAnggotaController::class, 'failInterview'])->name('calon-anggota.fail-interview');
     Route::delete('/calon-anggota/{anggotum}', [AdminAnggotaController::class, 'destroy'])->name('calon-anggota.destroy');
+
+    Route::get('/pengaturan/wa', [AdminPengaturanController::class, 'waSetting'])->name('pengaturan.wa.setting');
+    Route::put('/pengaturan/wa', [AdminPengaturanController::class, 'waUpdate'])->name('pengaturan.wa.update');
+    Route::get('/setting', [AdminSettingController::class, 'index'])->name('setting.index');
+    Route::post('/setting', [AdminSettingController::class, 'store'])->name('setting.store');
+    Route::post('/setting/profile', [AdminSettingController::class, 'updateProfile'])->name('setting.profile.update');
 })
 ;
 
@@ -77,6 +93,8 @@ Route::prefix('pengurus')->name('pengurus.')->group(function () {
   Route::resource('aspirasi', AspirasiController::class)->only(['index', 'show', 'destroy']);
   Route::resource('berita', BeritaController::class);
   Route::resource('prestasi', PrestasiController::class);
+  Route::get('/prestasi/export/pdf', [PrestasiController::class, 'exportPdf'])->name('prestasi.export.pdf');
+  Route::get('/prestasi/export/csv', [PrestasiController::class, 'exportCsv'])->name('prestasi.export.csv');
   Route::resource('divisi', PengurusDivisiController::class);
   Route::resource('users', PengurusUserController::class);
 
@@ -84,24 +102,30 @@ Route::prefix('pengurus')->name('pengurus.')->group(function () {
         Route::get('calon-anggota', [AnggotaController::class, 'calonAnggota'])->name('calon-anggota.index');
         Route::post('calon-anggota/{pendaftaran}/approve', [AnggotaController::class, 'approveCandidate'])->name('calon-anggota.approve');
         Route::post('calon-anggota/{pendaftaran}/reject', [AnggotaController::class, 'rejectCandidate'])->name('calon-anggota.reject');
-        Route::get('calon-anggota-tahap-1', [AdminAnggotaController::class, 'calonAnggotaTahap1'])->name('calon-anggota-tahap-1.index');
-        Route::get('calon-anggota-tahap-2', [AdminAnggotaController::class, 'calonAnggotaTahap2'])->name('calon-anggota-tahap-2.index');
+        Route::get('calon-anggota-tahap-1', [AnggotaController::class, 'calonAnggotaTahap1'])->name('calon-anggota-tahap-1.index');
+        Route::get('/calon-anggota-tahap-1/export/pdf', [AnggotaController::class, 'exportPdfTahap1'])->name('calon-anggota-tahap-1.export.pdf');
+        Route::get('/calon-anggota-tahap-1/export/csv', [AnggotaController::class, 'exportCsvTahap1'])->name('calon-anggota-tahap-1.export.csv');
+        Route::get('calon-anggota-tahap-2', [AnggotaController::class, 'calonAnggotaTahap2'])->name('calon-anggota-tahap-2.index');
         Route::post('calon-anggota/{pendaftaran}/approve-stage-2', [AdminAnggotaController::class, 'approveCandidateStage2'])->name('calon-anggota.approve-stage-2');
         Route::post('calon-anggota/{pendaftaran}/reject-stage-2', [AdminAnggotaController::class, 'rejectCandidateStage2'])->name('calon-anggota.reject-stage-2');
         Route::post('calon-anggota/{pendaftaran}/pass-interview', [AdminAnggotaController::class, 'passInterview'])->name('calon-anggota.pass-interview');
+        Route::post('calon-anggota/{pendaftaran}/fail-interview', [AdminAnggotaController::class, 'failInterview'])->name('calon-anggota.fail-interview');
         Route::get('kelola-anggota-himati', [AnggotaController::class, 'kelolaAnggotaHimati'])->name('kelola-anggota-himati.index');
         Route::get('anggota-per-divisi/{divisi}', [AnggotaController::class, 'anggotaPerDivisi'])->name('anggota.per.divisi');
 
   Route::delete('/calon-anggota/{anggotum}', [AnggotaController::class, 'destroy'])->name('calon-anggota.destroy');
 
-
+    Route::get('/pengaturan/wa', [PengaturanController::class, 'waSetting'])->name('pengaturan.wa.setting');
+    Route::put('/pengaturan/wa', [PengaturanController::class, 'waUpdate'])->name('pengaturan.wa.update');
 });
 
 Route::prefix('user')->name('user.')->group(function () {
     Route::view('/beranda', 'user.beranda')->name('beranda');
     Route::get('/divisi', [UserDivisiController::class, 'index'])->name('divisi');
     Route::get('/divisi/{divisi}', [UserDivisiController::class, 'show'])->name('divisi.show');
-    Route::view('/profil', 'user.profil')->name('profil');
+    Route::get('/profil', [UserProfileController::class, 'showProfile'])->name('profil');
+    Route::get('/profil/pengaturan', [UserProfileController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil/pengaturan', [UserProfileController::class, 'update'])->name('profil.update');
     Route::get('/berita', [UserBeritaController::class, 'index'])->name('berita');
     Route::get('/berita/{berita}', [UserBeritaController::class, 'show'])->name('berita.show');
     Route::post('/berita/{berita}/komentar', [UserBeritaController::class, 'storeKomentar'])->name('komentar.store');
@@ -111,7 +135,7 @@ Route::prefix('user')->name('user.')->group(function () {
     Route::view('/aspirasi', 'user.aspirasi')->name('aspirasi');
     Route::post('/aspirasi', [AspirasiUserController::class, 'store'])->name('aspirasi.store');
     Route::view('/bermasalah', 'user.bermasalah')->name('bermasalah');
-    Route::post('/bermasalah', [PengaduanController::class, 'store'])->name('bermasalah.store');
+    Route::post('/bermasalah', [\App\Http\Controllers\Admin\PengaduanController::class, 'store'])->name('bermasalah.store');
 });
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);

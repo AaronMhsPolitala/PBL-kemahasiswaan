@@ -23,6 +23,7 @@
     .btn-primary { background-color: var(--primary-color); color: #fff; }
     .btn-edit { background-color: #f97316; color: #fff; }
     .btn-danger { background-color: var(--danger-color); color: #fff; }
+    .btn-success { background-color: var(--success-color); color: #fff; }
     .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
     .filter-bar input, .filter-bar select { padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid var(--border-color); }
     .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.375rem; }
@@ -42,14 +43,18 @@
 <div id="bermasalah-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Data Mahasiswa Bermasalah</h1>
-        <a href="{{ route('admin.mahasiswa-bermasalah.create') }}" class="btn btn-primary">Tambah Data</a>
+        <div class="d-flex">
+            <a href="{{ route('admin.mahasiswa-bermasalah.create') }}" class="btn btn-primary me-2">Tambah Data</a>
+            <a href="{{ route('admin.mahasiswa-bermasalah.export.pdf') }}" class="btn btn-danger me-2">Export PDF</a>
+            <a href="{{ route('admin.mahasiswa-bermasalah.export.csv') }}" class="btn btn-success">Export CSV</a>
+        </div>
     </div>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <div class="filter-bar">
+    <div class="filter-bar" style="margin-top: 2rem;">
         <form action="{{ route('admin.mahasiswa-bermasalah.index') }}" method="GET" class="d-flex gap-3">
             <input type="text" name="search" placeholder="Cari NIM, Nama..." value="{{ request('search') }}">
             <select name="jenis_masalah">
