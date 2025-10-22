@@ -22,4 +22,8 @@
             @endforelse
         </div>
     </div>
+<<<<<<< HEAD
 @endsection
+=======
+@endsection
+>>>>>>> cabang1

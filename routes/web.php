@@ -27,9 +27,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::view('/mahasiswa-bermasalah', 'admin.bermasalah.index')->name('mahasiswa-bermasalah');
 
+<<<<<<< HEAD
     Route::resource('prestasi', AdminPrestasiController::class)->except(['create', 'show', 'edit']);
 
     Route::resource('berita', AdminBeritaController::class);
+=======
+    Route::get('prestasi', function () { return view('admin.prestasi.index'); })->name('prestasi.index');
+
+    Route::get('berita', function () { return view('admin.berita.index'); })->name('berita.index');
+>>>>>>> cabang1
 
     Route::get('/kelola-anggota-himati', [AdminAnggotaController::class, 'index'])->name('kelola-anggota-himati.index');
     Route::get('/calon-anggota', [AdminAnggotaController::class, 'calonAnggota'])->name('calon-anggota.index');
@@ -50,9 +56,15 @@ Route::prefix('pengurus')->name('pengurus.')->group(function () {
 
 
 
+<<<<<<< HEAD
   Route::resource('prestasi', PrestasiController::class)->except(['create', 'show', 'edit']);
 
   Route::resource('berita', BeritaController::class);
+=======
+  Route::get('berita', function () { return view('pengurus.berita.index'); })->name('berita.index');
+
+  Route::get('prestasi', function () { return view('pengurus.prestasi.index'); })->name('prestasi.index');
+>>>>>>> cabang1
 
         Route::resource('anggota', AnggotaController::class);
         Route::get('calon-anggota', [AnggotaController::class, 'calonAnggota'])->name('calon-anggota.index');
@@ -78,10 +90,13 @@ Route::prefix('user')->name('user.')->group(function () {
     Route::post('/pendaftaran', [UserPendaftaranController::class, 'store'])->name('pendaftaran.store');
     Route::get('/prestasi', [UserPrestasiController::class, 'index'])->name('prestasi');
 
+<<<<<<< HEAD
     Route::get('/berita', [UserBeritaController::class, 'index'])->name('berita');
     Route::get('/berita/{berita}', [UserBeritaController::class, 'show'])->name('berita.show');
     Route::post('/berita/{berita}/komentar', [UserBeritaController::class, 'storeKomentar'])->name('komentar.store');
 
+=======
+>>>>>>> cabang1
     Route::view('/aspirasi', 'user.aspirasi')->name('aspirasi');
     Route::post('/aspirasi', [AspirasiUserController::class, 'store'])->name('aspirasi.store');
 

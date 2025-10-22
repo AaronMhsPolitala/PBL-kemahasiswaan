@@ -22,4 +22,8 @@ class BeritaFactory extends Factory
             'foto_berita' => 'berita/placeholder.svg',
         ];
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cabang1

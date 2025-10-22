@@ -27,4 +27,8 @@ return new class extends Migration
     {
         Schema::dropIfExists('beritas');
     }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> cabang1

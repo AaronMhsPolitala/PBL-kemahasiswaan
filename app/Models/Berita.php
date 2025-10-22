@@ -19,4 +19,8 @@ class Berita extends Model
     {
         return $this->hasMany(Komentar::class);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cabang1

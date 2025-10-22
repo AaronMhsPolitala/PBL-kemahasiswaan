@@ -1,5 +1,6 @@
 @extends('layouts.pengurus')
 
+<<<<<<< HEAD
 @section('title', 'Kelola Berita')
 
 @section('content')
@@ -70,3 +71,11 @@
 .data-table th{background:#f9fafb}
 </style>
 @endpush
+=======
+@section('title', 'Pengurus Berita')
+
+@section('content')
+    <h1>Pengurus Berita Index</h1>
+    <p>This is the empty pengurus berita index page.</p>
+@endsection
+>>>>>>> cabang1

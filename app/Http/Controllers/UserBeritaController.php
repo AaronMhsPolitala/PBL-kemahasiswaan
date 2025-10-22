@@ -34,4 +34,8 @@ class UserBeritaController extends Controller
 
         return back()->with('success', 'Komentar berhasil ditambahkan.');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cabang1
