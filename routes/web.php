@@ -27,9 +27,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::view('/mahasiswa-bermasalah', 'admin.bermasalah.index')->name('mahasiswa-bermasalah');
 
-    Route::resource('prestasi', AdminPrestasiController::class)->except(['create', 'show', 'edit']);
+    Route::get('prestasi', function () { return view('admin.prestasi.index'); })->name('prestasi.index');
 
-    Route::resource('berita', AdminBeritaController::class);
+    Route::get('berita', function () { return view('admin.berita.index'); })->name('berita.index');
 
     Route::get('/kelola-anggota-himati', [AdminAnggotaController::class, 'index'])->name('kelola-anggota-himati.index');
     Route::get('/calon-anggota', [AdminAnggotaController::class, 'calonAnggota'])->name('calon-anggota.index');
@@ -50,9 +50,9 @@ Route::prefix('pengurus')->name('pengurus.')->group(function () {
 
 
 
-  Route::resource('prestasi', PrestasiController::class)->except(['create', 'show', 'edit']);
+  Route::get('berita', function () { return view('pengurus.berita.index'); })->name('berita.index');
 
-  Route::resource('berita', BeritaController::class);
+  Route::get('prestasi', function () { return view('pengurus.prestasi.index'); })->name('prestasi.index');
 
         Route::resource('anggota', AnggotaController::class);
         Route::get('calon-anggota', [AnggotaController::class, 'calonAnggota'])->name('calon-anggota.index');
@@ -77,10 +77,6 @@ Route::prefix('user')->name('user.')->group(function () {
     Route::view('/pendaftaran', 'user.pendaftaran')->name('pendaftaran');
     Route::post('/pendaftaran', [UserPendaftaranController::class, 'store'])->name('pendaftaran.store');
     Route::get('/prestasi', [UserPrestasiController::class, 'index'])->name('prestasi');
-
-    Route::get('/berita', [UserBeritaController::class, 'index'])->name('berita');
-    Route::get('/berita/{berita}', [UserBeritaController::class, 'show'])->name('berita.show');
-    Route::post('/berita/{berita}/komentar', [UserBeritaController::class, 'storeKomentar'])->name('komentar.store');
 
     Route::view('/aspirasi', 'user.aspirasi')->name('aspirasi');
     Route::post('/aspirasi', [AspirasiUserController::class, 'store'])->name('aspirasi.store');
