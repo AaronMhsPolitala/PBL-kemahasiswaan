@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Aspirasi;
 use App\Models\Berita;
-use App\Models\Pendaftaran;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -15,10 +13,7 @@ class DashboardController extends Controller
     {
         $beritaCount = Berita::count();
         $aspirasiCount = Aspirasi::count();
-        $anggotaCount = Pendaftaran::where('status', 'Lulus Wawancara')->count();
-        $userCount = User::count();
-        $users = User::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('beritaCount', 'aspirasiCount', 'anggotaCount', 'userCount', 'users'));
+        return view('admin.index', compact('beritaCount', 'aspirasiCount'));
     }
 }

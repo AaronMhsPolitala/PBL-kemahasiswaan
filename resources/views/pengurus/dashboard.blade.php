@@ -7,11 +7,11 @@
   <div class="cards-container">
     <div class="card">
       <div class="card-icon"><i class="fas fa-user"></i></div>
-      <div class="card-info"><h3>Data User</h3><p>{{ $userCount }}</p></div>
+      <div class="card-info"><h3>Data User</h3><p>0</p></div>
     </div>
     <div class="card">
       <div class="card-icon"><i class="fas fa-users"></i></div>
-      <div class="card-info"><h3>Data Anggota</h3><p>{{ $anggotaCount }}</p></div>
+      <div class="card-info"><h3>Data Anggota</h3><p>0</p></div>
     </div>
     <div class="card">
       <div class="card-icon"><i class="fas fa-newspaper"></i></div>
@@ -36,6 +36,8 @@
       </tr>
     </thead>
     <tbody>
+    @php($users = $users ?? [])
+
       @forelse ($users as $user)
         <tr>
           <td class="user-photo">
@@ -43,7 +45,7 @@
           </td>
           <td>{{ $user->name }}</td>
           <td>{{ $user->email }}</td>
-          <td>{{ $user->no_wa }}</td>
+          <td>{{ $user->phone }}</td>
           <td>{{ strtoupper($user->role) }}</td>
         </tr>
       @empty

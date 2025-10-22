@@ -1,10 +1,12 @@
-@extends('layouts.pengurus')
+@extends('layouts.admin')
+
+@section('title', 'Tambah Aspirasi')
 
 @section('content')
     <div class="container">
         <h1>Tambah Aspirasi Baru</h1>
 
-        <form action="{{ route('pengurus.aspirasi.store') }}" method="POST">
+        <form action="{{ route('admin.aspirasi.store') }}" method="POST">
             @csrf
             <div class="mb-3">
                 <label for="nama" class="form-label">Nama</label>

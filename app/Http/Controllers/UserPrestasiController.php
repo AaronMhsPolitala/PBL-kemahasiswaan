@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Prestasi;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserPrestasiController extends Controller
 {
@@ -12,47 +11,33 @@ class UserPrestasiController extends Controller
     {
         $query = Prestasi::query();
 
-        // Search
+        // Filtering
+        if ($request->filled('periode')) {
+            $query->where('periode', $request->periode);
+        }
+        if ($request->filled('sistem_kuliah')) {
+            $query->where('sistem_kuliah', $request->sistem_kuliah);
+        }
+
+        // Searching
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('nama_mahasiswa', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%")
-                  ->orWhere('nama_kegiatan', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
             });
         }
 
-        // Filter
-        if ($request->filled('tingkat_kegiatan')) {
-            $query->where('tingkat_kegiatan', $request->tingkat_kegiatan);
-        }
-        if ($request->filled('keterangan')) {
-            $query->where('keterangan', $request->keterangan);
-        }
+        $prestasis = $query->latest()->paginate(10)->withQueryString();
 
-        // Get all matching results
-        $allPrestasis = $query->get();
+        // For filter dropdowns
+        $periodes = Prestasi::select('periode')->distinct()->orderBy('periode', 'desc')->get();
+        $sistemKuliahs = Prestasi::select('sistem_kuliah')->distinct()->get();
 
-        // Sort by SAW score
-        $sortedPrestasis = $allPrestasis->sortByDesc('total_skor');
-
-        // Manual Pagination
-        $page = $request->get('page', 1);
-        $perPage = 10;
-        $offset = ($page * $perPage) - $perPage;
-
-        $prestasis = new LengthAwarePaginator(
-            $sortedPrestasis->slice($offset, $perPage),
-            $sortedPrestasis->count(),
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
-        // Data for filters
-        $tingkat_kegiatans = ['Internal (Kampus)', 'Kabupaten/Kota', 'Provinsi', 'Nasional', 'Internasional'];
-        $keterangans = ['Akademik', 'Non-Akademik'];
-
-        return view('user.prestasi', compact('prestasis', 'tingkat_kegiatans', 'keterangans'));
+        return view('user.prestasi', [
+            'prestasis' => $prestasis,
+            'periodes' => $periodes,
+            'sistemKuliahs' => $sistemKuliahs,
+        ]);
     }
 }

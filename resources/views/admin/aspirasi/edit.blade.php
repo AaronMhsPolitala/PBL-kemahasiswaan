@@ -1,10 +1,12 @@
-@extends('layouts.pengurus')
+@extends('layouts.admin')
+
+@section('title', 'Edit Aspirasi')
 
 @section('content')
     <div class="container">
         <h1>Edit Aspirasi</h1>
 
-        <form action="{{ route('pengurus.aspirasi.update', $aspirasi->id) }}" method="POST">
+        <form action="{{ route('admin.aspirasi.update', $aspirasi->id) }}" method="POST">
             @csrf
             @method('PUT')
             <div class="mb-3">
