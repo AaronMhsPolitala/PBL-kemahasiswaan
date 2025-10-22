@@ -14,7 +14,10 @@ class BeritaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Truncate the table to start fresh\n        \Illuminate\Support\Facades\DB::statement(\'SET FOREIGN_KEY_CHECKS=0;\');\n        Berita::truncate();\n        \Illuminate\Support\Facades\DB::statement(\'SET FOREIGN_KEY_CHECKS=1;\');
+        // Truncate the table to start fresh
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Berita::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         // Create a placeholder image on the public disk
         $directory = 'berita';
